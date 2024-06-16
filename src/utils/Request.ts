@@ -2,14 +2,13 @@ import axios, {AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosRequestHea
 import {ElMessage, ElMessageBox} from 'element-plus';
 import router from '@/router/index'
 import {ResultEnum} from "@/utils/Enum";
-import {loginStore} from "@/stores/modules/login";
 import {h} from "vue";
+import {userStore} from "@/stores/modules/user";
 //axios请求配置
 const config = {
     baseURL: import.meta.env.VITE_APP_BASE_API,
     timeout: 10000
 }
-let flag = null
 
 class Request {
     //axios实例
@@ -27,18 +26,11 @@ class Request {
     private interceptors(config) {
         //axios发送请求之前的处理
         this.instance.interceptors.request.use(config => {
-            const useLoginStore = loginStore()
+            const useUserStore = userStore()
             //在请求头部携带token
-            let tokenValue = useLoginStore.tokenValue
-            let tokenName = useLoginStore.tokenName
-            if (tokenValue) {
-                config.headers![tokenName] = tokenValue
-            }
-            if (config.url == "/user/getExcelTemplate" || config.url == "/user/exportExcel") {
-                config.responseType = 'blob'
-                flag = false
-            } else {
-                flag = true
+            let tokenInfo = useUserStore.getTokenInfo()
+            if (tokenInfo.tokenValue) {
+                config.headers![tokenInfo.tokenName] = tokenInfo.tokenValue
             }
             return config;
         }, (error: any) => {
@@ -54,9 +46,6 @@ class Request {
                 ElMessage.error('系统异常')
                 return Promise.reject('系统异常')
             }
-            if (!flag) {
-                return res
-            }
             if (res.code != ResultEnum.SUCCESS) {
                 switch (res.code) {
                     case ResultEnum.NO_PERMISSION:
@@ -65,7 +54,7 @@ class Request {
                     case ResultEnum.ERROR:
                         ElMessage.error(res.msg || '请求失败，请联系管理员处理')
                         break
-                    case ResultEnum.ERROR_OTHER:
+                    case ResultEnum.ACCOUNT_BANNED:
                         let list = []
                         for (const [key, value] of Object.entries(res.data)) {
                             let str = h('p', null, `${key} : ${value} `)

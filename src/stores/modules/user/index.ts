@@ -29,23 +29,20 @@ export const userStore = defineStore('userStore', () => {
     const setEncryptStr = (encryptStr) => {
         data.encryptStr = encryptStr
     }
+    const initPersonalInfo = () => {
+        // todo 获取用户信息
+    }
     return {
         getPersonalInfo,
         getTokenInfo,
         setTokenInfo,
         setUserId,
         setEncryptStr,
+        initPersonalInfo
     }
 
 }, {
     persist: {
-        enabled: true,
-        strategies: [
-            {
-                key: "infoStr",
-                paths: ['encryptStr'],
-                storage: localStorage
-            }
-        ]
+        enabled: true
     }
 })

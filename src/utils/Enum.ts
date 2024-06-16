@@ -6,6 +6,8 @@ export enum ResultEnum {
     NO_PERMISSION = 403,
     // 失败
     ERROR = 500,
+    // 账号封禁
+    ACCOUNT_BANNED = 501,
     // 异地登陆
     BE_REPLACED = 603,
     // 被强制下线

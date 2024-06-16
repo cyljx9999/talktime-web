@@ -1,6 +1,5 @@
 import Cookies from 'js-cookie'
 
-
 // 写入cookie并设置有效期
 export function setCookie(key,value,second){
     let expiresTime = new Date(new Date() * 1 + second * 1000);
