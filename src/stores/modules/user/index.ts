@@ -1,3 +1,4 @@
+// @ts-nocheck
 import {defineStore} from 'pinia'
 import {reactive} from "vue";
 //定义store
@@ -19,9 +20,9 @@ export const userStore = defineStore('userStore', () => {
             tokenName: data.tokenName,
         }
     }
-    const setTokenInfo = (data) => {
-        data.tokenValue = data
-        data.tokenName = data
+    const setTokenInfo = (info) => {
+        data.tokenValue = info.tokenValue
+        data.tokenName = info.tokenName
     }
     const setUserId = (userId) => {
         data.userId = userId
@@ -38,11 +39,7 @@ export const userStore = defineStore('userStore', () => {
         setTokenInfo,
         setUserId,
         setEncryptStr,
-        initPersonalInfo
-    }
-
-}, {
-    persist: {
-        enabled: true
+        initPersonalInfo,
+        data
     }
 })

@@ -320,7 +320,7 @@ onMounted(() => {
 })
 </script>
 
-<style scoped lang="less">
+<style scoped lang="scss">
 .not-found {
   .me404 {
     width: 1000px;

@@ -1,6 +1,5 @@
+// @ts-nocheck
 import request from "@/utils/Request";
-
-
 // 获取系统验证码
 export const getSystemCodeApi = ()=>{
     return request.get("/talktime/getCaptcha")

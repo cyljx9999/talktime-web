@@ -71,17 +71,42 @@
           </el-form>
         </el-tab-pane>
       </el-tabs>
+      <el-row :gutter="24">
+        <el-col :span="24">
+          <el-button class="qrCode-btn" @click="showQrCodeDialog">扫码登陆</el-button>
+        </el-col>
+      </el-row>
     </div>
+
+    <custom-dialog
+        :title="qrCodeConfig.title"
+        :visible="qrCodeConfig.visible"
+        :width="qrCodeConfig.width"
+        :button-confirm-show="qrCodeConfig.buttonConfirmShow"
+        @onClose="qrCodeClose"
+    >
+      <template #content>
+        <div class="qrcode-box flex-column-center">
+          <p class="tip">{{ pageData.qrCodeTip }}</p>
+          <vue-qr :text="pageData.qrCodeUrl" :size="280"></vue-qr>
+        </div>
+      </template>
+    </custom-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
-import {ref, reactive,getCurrentInstance} from 'vue'
+// @ts-nocheck
+import {ref, reactive, getCurrentInstance} from 'vue'
 import {getSystemCodeApi, loginApi, sendPhoneCodeApi} from "@/api/loginApi.ts";
 import {regexPhone} from "@/utils/RegexUtil.ts";
 import {rsaEncrypt} from "@/utils/JSEncryptUtil.ts";
 import router from "@/router";
 import {userStore} from "@/stores/modules/user";
+import CustomDialog from "@/components/dialog/CustomDialog.vue";
+import {websocketStore} from "@/stores/modules/websocket";
+import {ScanLoginResponseStatusEnum} from "@/utils/Enum.ts";
+import vueQr from "vue-qr/src/packages/vue-qr.vue";
 
 // 账号登录表单引用
 const accountLoginRef = ref("")
@@ -91,13 +116,24 @@ const phoneLoginRef = ref("")
 const {proxy} = getCurrentInstance()
 // 使用用户存储
 const useUserStore = userStore()
+const useWebsocketStore = websocketStore()
 
 // 页面数据
 const pageData = reactive({
   // 当前活跃的选项卡，默认为账号
   activeName: "account",
   // 验证码图片
-  codeImage: ""
+  codeImage: "",
+  // 公众号登陆二维码
+  qrCodeUrl: "",
+  // 公众号登陆默认提示
+  qrCodeTip: "首次扫码登陆会自动创建账号",
+})
+const qrCodeConfig = reactive({
+  title: "请使用微信扫码关注",
+  width: "600px",
+  visible: false,
+  buttonConfirmShow: false
 })
 
 // 账号登录参数
@@ -167,7 +203,11 @@ const accountLoginRules = reactive({
 const phoneLoginRules = reactive({
   phone: [
     {required: true, message: '请输入账号', trigger: 'blur'},
-    {pattern: /^(0|86|17951)?(13[0-9]|15[012356789]|166|17[3678]|18[0-9]|14[57])[0-9]{8}$/, message: '请输入正确的手机号', trigger: 'blur'}
+    {
+      pattern: /^(0|86|17951)?(13[0-9]|15[012356789]|166|17[3678]|18[0-9]|14[57])[0-9]{8}$/,
+      message: '请输入正确的手机号',
+      trigger: 'blur'
+    }
   ],
   phoneCode: [
     {required: true, message: '请输入验证码', trigger: 'blur'}
@@ -196,7 +236,6 @@ const sendPhoneCode = () => {
   // 清除掉定时器
   sendCodeData.timer && clearInterval(sendCodeData.timer)
   // 开启定时器
-  // @ts-ignore
   sendCodeData.timer = setInterval(() => {
     const tmp = sendCodeData.duration--
     sendCodeData.text = `${tmp}秒`
@@ -216,27 +255,27 @@ const sendPhoneCode = () => {
 }
 
 // 登陆按钮点击事件
-const loginBtnClick = async ()=>{
+const loginBtnClick = async () => {
   let formEl = "";
   let formData = {};
-  if(pageData.activeName === "account"){
+  if (pageData.activeName === "account") {
     formEl = accountLoginRef.value
     formData = accountLoginParams
-  }else if(pageData.activeName === "phone"){
+  } else if (pageData.activeName === "phone") {
     formEl = phoneLoginRef.value
     formData = phoneLoginParams
   }
-  await formEl.validate((valid, fields) => {
+  await formEl.validate((valid) => {
     if (valid) {
       const sendData = {
         encryptStr: "",
       }
-      encryptForm.encryptStr = rsaEncrypt(formData)
+      sendData.encryptStr = rsaEncrypt(formData)
       loginApi(sendData).then(res => {
         // 存储登录信息
         useUserStore.setTokenInfo({
-          tokenName:res.data.tokenName,
-          tokenValue:res.data.tokenValue
+          tokenName: res.data.tokenName,
+          tokenValue: res.data.tokenValue
         });
         useUserStore.setUserId(Number(res.data.userId));
         // 初始化个人信息
@@ -256,13 +295,52 @@ const loginBtnClick = async ()=>{
 const tabHandleClick = (tab) => {
   if (tab.props.name === 'phone') {
     accountLoginRef.value.resetFields()
-  }else if (tab.props.name === 'account') {
+  } else if (tab.props.name === 'account') {
     phoneLoginRef.value.resetFields()
   }
+}
+
+// 二维码弹出框关闭事件
+const qrCodeClose = () => {
+  qrCodeConfig.visible = false
+}
+// 二维码弹出框点击事件
+useWebsocketStore.initWebsocket()
+useWebsocketStore.data.websocketInstance.onmessage = function (e) {
+  // 服务器返回的消息实体
+  const messageEntity = JSON.parse(e.data)
+  console.log(messageEntity)
+  if (messageEntity.type === ScanLoginResponseStatusEnum.LOGIN_URL) {
+    // 第一步 获取登陆二维码
+    pageData.qrCodeUrl = messageEntity.data.loginUrl
+    qrCodeConfig.visible = true
+    console.log("扫码登陆二维码地址：" + pageData.qrCodeUrl)
+  } else if (messageEntity.type === ScanLoginResponseStatusEnum.LOGIN_SCAN_SUCCESS) {
+    // 第二步 用户扫码成功，等到授权
+    pageData.qrCodeTip = "扫码成功，请点击授权"
+  } else if (messageEntity.type === ScanLoginResponseStatusEnum.LOGIN_SUCCESS) {
+    // 第三步 用户登陆成功
+    // 存储登录信息
+    useUserStore.setTokenInfo({
+      tokenName: messageEntity.data.tokenName,
+      tokenValue: messageEntity.data.tokenValue
+    })
+    useUserStore.setUserId(Number(messageEntity.data.userId))
+    qrCodeConfig.visible = false
+    // 跳转到聊天页面
+    router.push("/chat")
+  }
+}
+// 扫码登陆弹出框点击事件
+const showQrCodeDialog = async () => {
+  useWebsocketStore.data.websocketInstance.send(JSON.stringify({
+    "type": "qrcode"
+  }))
 }
 </script>
 
 <style scoped lang="scss">
+
 .login-container {
   width: 100vw;
   height: 100vh;
@@ -275,51 +353,90 @@ const tabHandleClick = (tab) => {
   background-size: cover;
   /* 设置背景颜色，背景图加载过程中会显示背景色 */
   background-color: #464646;
-
   .form-box {
-    width: 25%;
+
+    width: 20%;
+    min-width: 300px;
     position: fixed;
     left: 276px;
     top: 350px;
 
-    .image{
+    .image {
       width: 100%;
       height: 30px;
     }
 
-    .login-btn{
+    .login-btn {
       width: 100%;
       background-color: $system-color;
       border: none;
     }
-    .send-btn{
+
+    .qrCode-btn {
+      width: 100%;
+      background-color: $system-color;
+      border: none;
+      margin-top: 10px;
+      color: white;
+    }
+
+    .send-btn {
       width: 100%;
     }
+
+
     // 发送验证码按钮鼠标移入颜色
     :deep(.el-button:hover) {
       color: $system-color;
       border-color: $system-color;
       background-color: white;
     }
+
     // 发送验证码按钮点击颜色
     :deep(.el-button:focus) {
       color: $system-color;
       border-color: $system-color;
       background-color: white;
     }
-    :deep(.el-radio__input.is-checked .el-radio__inner){
-      background-color:$system-color;
+
+    .login-btn:hover, .login-btn:focus {
+      width: 100%;
+      background-color: $system-color;
+      border: none;
+      color: white;
+    }
+
+    .qrCode-btn:hover, .qrCode-btn:focus {
+      width: 94%;
+      background-color: $system-color;
+      border: none;
+      margin-top: 10px;
+      color: white;
+    }
+
+    :deep(.login-container .el-button:hover) {
+      color: $system-color;
+      border-color: $system-color;
+      background-color: #84f0a6;
+    }
+
+    :deep(.el-radio__input.is-checked .el-radio__inner) {
+      background-color: $system-color;
       border: none;
     }
-    :deep(.el-tabs__item.is-active){
+
+    :deep(.el-tabs__item.is-active) {
       color: $system-color;
     }
+
     :deep(.el-tabs__nav .el-tabs__item:hover) {
       color: $system-color;
     }
-    :deep(.el-radio--large){
+
+    :deep(.el-radio--large) {
       height: 32px !important;
     }
+
     :deep(.el-tabs) {
       width: 100% !important;
     }
@@ -334,6 +451,14 @@ const tabHandleClick = (tab) => {
       background-color: $system-color;
     }
 
+  }
+
+  .qrcode-box {
+    .tip {
+      margin-top: 10px;
+      color: $system-color;
+      font-weight: 500;
+    }
   }
 }
 </style>

@@ -1,9 +1,15 @@
+// @ts-nocheck
 import {createRouter, createWebHistory, RouteRecordRaw} from 'vue-router'
 
 const routes: Array<RouteRecordRaw> = [
     {
         "path": "/",
-        redirect:"/login"
+        redirect: "/login"
+    },
+    {
+        "path": "/chat",
+        "name": "chat",
+        "component": () => import('@/views/chat/Chat.vue'),
     },
     {
         path: '/login',

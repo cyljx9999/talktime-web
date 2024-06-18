@@ -1,29 +1,27 @@
+// @ts-nocheck
 import {defineStore} from 'pinia'
-import router from "@/router"
-import QmMessageBox from "@/utils/QmMessageBox";
 import {reactive} from "vue";
+import {userStore} from "../user";
 
-// @ts-ignore
 const url = import.meta.env.VITE_APP_WEBSOCKET_API
 //定义store
 export const websocketStore = defineStore('websocketStore', () => {
+    const useUserStore = userStore();
     const data = reactive({
-        // 用于存储因网络异常等操作未发生信息存储
-        unsentMessageInfo: [],
         // websocket实例
         websocketInstance: null,
         // 重连次数
-        reconnectAttempts = 0,
+        reconnectAttempts: 0,
         // 最大重连数
-        maxReconnectAttempts = 5,
+        maxReconnectAttempts: 5,
         // 重连间隔(ms)
-        reconnectInterval = 10000,
+        reconnectInterval: 10000,
         // 发送心跳数据间隔
-        heartbeatInterval = 1000 * 30,
+        heartbeatInterval: 1000 * 30,
         // 计时器id
-        heartbeatTimer = undefined,
+        heartbeatTimer: undefined,
         // 彻底终止ws
-        stopWs = false
+        stopWs: false,
     })
 
     const initWebsocket = () => {
@@ -33,50 +31,65 @@ export const websocketStore = defineStore('websocketStore', () => {
         if (data.websocketInstance && data.websocketInstance.readyState === WebSocket.OPEN) {
             return;
         }
-        // @ts-ignore
-        data.websocketInstance = new WebSocket(url + "?token=" + localStorage.getItem("token"));
+        let tokenValue = "";
+        if (localStorage.getItem(useUserStore.getTokenInfo().tokenName)) {
+            tokenValue = localStorage.getItem(useUserStore.getTokenInfo().tokenName);
+        }
+        data.websocketInstance = new WebSocket(url + "?token=" + tokenValue);
         connectSuccess()
-        handleMessage()
+        // receiveMessage()
         handleError()
         handleClose()
     }
     // 连接成功之后的操作
     const connectSuccess = () => {
-        this.websocketInstance.onopen = function () {
+
+        data.websocketInstance.onopen = function (e) {
+            console.log("WebSocket', `初始化成功...");
             data.stopWs = false;
             // 重置重连尝试成功连接
             data.reconnectAttempts = 0;
             // 在连接成功时停止当前的心跳检测并重新启动
-            startHeartbeat();
+            // startHeartbeat();
         }
     }
     // 处理接收服务端返回消息
-    const handleMessage = () => {
-        this.websocketInstance.onmessage = function (e) {
-            console.log(JSON.parse(e.data))
-            // 服务器返回的消息实体
-            const messageEntity = JSON.parse(e.data)
-            startHeartbeat();
-        }
+    const receiveMessage = () => {
+        return new Promise((resolve) => {
+            data.websocketInstance.onmessage = function (e) {
+                // 服务器返回的消息实体
+                const messageEntity = JSON.parse(e.data)
+                resolve(messageEntity)
+                // startHeartbeat();
+            }
+            setTimeout(function () {
+                resolve(null)
+            }, 5000)
+        })
     }
     // 处理异常信息消息
     const handleError = () => {
-        this.websocketInstance.onerror = function (e) {
+        data.websocketInstance.onerror = function (e) {
             if (data.reconnectAttempts === 0) {
                 console.log('WebSocket', `连接异常[onerror]...`);
             }
-            closeHeartbeat();
+            // closeHeartbeat();
         }
     }
     // 处理关闭信息
     const handleClose = () => {
-        this.websocketInstance.onclose = function (e) {
+        data.websocketInstance.onclose = function (e) {
             if (data.reconnectAttempts === 0) {
                 console.log('WebSocket', `连接断开[onclose]...`);
+                if (!data.stopWs) {
+                    handleReconnect();
+                }
+                data.stopWs = true;
+                data.websocketInstance.close();
+                data.websocketInstance = null;
+                // closeHeartbeat();
             }
-            if (!data.stopWs) {
-                handleReconnect();
-            }
+
         }
     }
     // 断网重连逻辑
@@ -88,25 +101,16 @@ export const websocketStore = defineStore('websocketStore', () => {
                 initWebsocket();
             }, data.reconnectInterval);
         } else {
-            closeHeartbeat();
+            // closeHeartbeat();
             console.log('WebSocket', `最大重连失败，终止重连:`);
         }
     }
     // 关闭连接
-    const close = () => {
-        if (this.socket) {
-            this.stopWs = true;
-            this.websocketInstance.close();
-            this.websocketInstance = null;
-        }
-        closeHeartbeat();
-    }
-
-    // 心跳检测
+// 心跳检测
     const startHeartbeat = () => {
         if (data.stopWs) return;
         if (data.heartbeatTimer) {
-            closeHeartbeat();
+            // closeHeartbeat();
         }
         data.heartbeatTimer = setInterval(() => {
             if (data.websocketInstance) {
@@ -122,7 +126,18 @@ export const websocketStore = defineStore('websocketStore', () => {
         clearInterval(data.heartbeatTimer);
         data.heartbeatTimer = undefined;
     }
+
+    const getMessageList = (type) => {
+        if (type == "new") {
+            return data.messageList[data.messageList.length - 1]
+        } else {
+            return data.messageList
+        }
+    }
     return {
-        initWebsocket
+        initWebsocket,
+        data,
+        getMessageList,
+        receiveMessage
     }
 })

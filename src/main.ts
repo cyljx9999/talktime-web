@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { createApp } from 'vue'
 import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
@@ -10,7 +11,7 @@ import router from './router'
 import store from "@/stores";
 import '@/assets/style/index.scss'
 import { ElMessage } from "element-plus";
-
+import 'animate.css' //引入
 
 const app = createApp(App)
 app.config.globalProperties.$message = ElMessage;
