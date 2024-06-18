@@ -1,3 +1,4 @@
+// @ts-nocheck
 import SvgIcon from '@/components/SvgIcon/index'
 
 // 全局对象

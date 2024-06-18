@@ -457,7 +457,7 @@ const showQrCodeDialog = async () => {
     .tip {
       margin-top: 10px;
       color: $system-color;
-      font-weight: 500;
+      font-weight: bold;
     }
   }
 }

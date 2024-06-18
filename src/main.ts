@@ -10,8 +10,11 @@ import globalComponent from '@/components'
 import router from './router'
 import store from "@/stores";
 import '@/assets/style/index.scss'
+import 'virtual:svg-icons-register'
 import { ElMessage } from "element-plus";
 import 'animate.css' //引入
+import 'element-plus/theme-chalk/dark/css-vars.css'
+
 
 const app = createApp(App)
 app.config.globalProperties.$message = ElMessage;

@@ -1,3 +1,4 @@
+// @ts-nocheck
 // 判断当前的时间状态
 import dayjs from "dayjs";
 
