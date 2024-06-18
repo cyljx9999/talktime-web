@@ -32,8 +32,8 @@ export const websocketStore = defineStore('websocketStore', () => {
             return;
         }
         let tokenValue = "";
-        if (localStorage.getItem(useUserStore.getTokenInfo().tokenName)) {
-            tokenValue = localStorage.getItem(useUserStore.getTokenInfo().tokenName);
+        if (localStorage.getItem("tokenValue")) {
+            tokenValue = localStorage.getItem("tokenValue");
         }
         data.websocketInstance = new WebSocket(url + "?token=" + tokenValue);
         connectSuccess()

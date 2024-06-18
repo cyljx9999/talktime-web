@@ -1,18 +1,20 @@
 // @ts-nocheck
 import {defineStore} from 'pinia'
 import {reactive} from "vue";
+import {getPersonalApi} from "../../../api/userApi.ts";
+import {rsaDecrypt} from "../../../utils/JSEncryptUtil.ts";
 //定义store
 export const userStore = defineStore('userStore', () => {
     const data = reactive({
         personalInfo: [],
-        encryptStr: "",
-        userId: 0,
-        tokenValue: "",
-        tokenName: "",
+        encryptStr: localStorage.getItem('encryptStr'),
+        userId: localStorage.getItem('userId'),
+        tokenValue: localStorage.getItem('tokenValue'),
+        tokenName: localStorage.getItem('tokenName'),
     })
     // 获取个人信息
     const getPersonalInfo = () => {
-        return data.personalInfo
+        return rsaDecrypt(data.encryptStr)
     }
     const getTokenInfo = () => {
         return {
@@ -21,17 +23,20 @@ export const userStore = defineStore('userStore', () => {
         }
     }
     const setTokenInfo = (info) => {
-        data.tokenValue = info.tokenValue
-        data.tokenName = info.tokenName
+        localStorage.setItem('tokenValue', info.tokenValue)
+        localStorage.setItem('tokenName', info.tokenName)
     }
     const setUserId = (userId) => {
-        data.userId = userId
+        localStorage.setItem('userId', userId)
     }
     const setEncryptStr = (encryptStr) => {
-        data.encryptStr = encryptStr
+        localStorage.setItem('encryptStr', encryptStr)
     }
     const initPersonalInfo = () => {
-        // todo 获取用户信息
+        // 获取用户信息
+        getPersonalApi().then(res => {
+            localStorage.setItem('encryptStr', res.data)
+        });
     }
     return {
         getPersonalInfo,

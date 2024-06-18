@@ -407,7 +407,6 @@ const showQrCodeDialog = async () => {
     }
 
     .qrCode-btn:hover, .qrCode-btn:focus {
-      width: 94%;
       background-color: $system-color;
       border: none;
       margin-top: 10px;

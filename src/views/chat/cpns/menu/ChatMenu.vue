@@ -1,13 +1,13 @@
 <template>
   <div class="menu-container">
-    <div class="top-circle-box">
+    <div class="top-circle-box flex-row-around">
       <svg-icon name="circle" color="red" width="30px" height="30px"></svg-icon>
       <svg-icon name="circle" color="yellow" width="30px" height="30px"></svg-icon>
       <svg-icon name="circle" color="green" width="30px" height="30px"></svg-icon>
     </div>
     <div class="avatar-box flex-row-center">
       <el-image class="img"
-                src="https://tse4-mm.cn.bing.net/th/id/OIP-C.EXm6YrmQaDu0enP4vXJ9_gAAAA?w=175&h=180&c=7&r=0&o=5&pid=1.7"/>
+                :src="personInfo.userAvatar"/>
     </div>
     <div class="icon-box flex-column-around">
       <svg-icon @click="chatClick" name="chat" :color="pageData.chatIconColor" width="70px" height="50px"></svg-icon>
@@ -23,6 +23,14 @@
 // @ts-nocheck
 import {reactive} from "vue";
 import {getTimeState} from "@/utils/TimeUtils";
+
+defineProps({
+  personInfo: {
+    type: Object,
+    required: true
+  },
+})
+
 
 const pageData = reactive({
   chatIconColor: "#bbbbbb",
@@ -55,7 +63,6 @@ const onLinkManClick = () => {
   width: 100px;
   height: 100vh;
   background-color: $menu-color;
-
   .avatar-box {
     height:100px;
     .img {

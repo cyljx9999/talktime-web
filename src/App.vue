@@ -6,4 +6,7 @@
 </template>
 
 <style scoped>
+*{
+  overflow: hidden;
+}
 </style>
