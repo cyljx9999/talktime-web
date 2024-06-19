@@ -1,8 +1,9 @@
 <template>
   <div class="chat-container">
-    <chat-menu :person-info="pageData.personalInfo" @chat-click="onChatClick" @link-man-click="onLinkManClick"></chat-menu>
+    <chat-menu :person-info="pageData.personalInfo" @chat-click="onChatClick"
+               @link-man-click="onLinkManClick"></chat-menu>
     <div class="box">
-      <chat-head :person-info="pageData.personalInfo" ></chat-head>
+      <chat-head :person-info="pageData.personalInfo" @update-personal-info="refreshPersonalInfo"></chat-head>
       <div class="inner-box">
         <chat-link-man class="linkman"></chat-link-man>
         <chat-message class="message"></chat-message>
@@ -24,25 +25,24 @@ import {userStore} from "@/stores/modules/user";
 import {reactive} from "vue";
 
 const pageData = reactive({
-  personalInfo:{}
+  personalInfo: {}
 })
 
 const useChatStore = chatStore()
 const useUserStore = userStore()
 const useWebsocketStore = websocketStore()
+
+// 初始化websocket
 useWebsocketStore.initWebsocket()
+// 监听websocket消息
 useWebsocketStore.data.websocketInstance.onmessage = function (e) {
   // 服务器返回的消息实体
   const messageEntity = JSON.parse(e.data)
   console.log(messageEntity)
   if (messageEntity.type === ScanLoginResponseStatusEnum.LOGIN_SUCCESS) {
-    // 获取个人信息
-    useUserStore.initPersonalInfo()
-    pageData.personalInfo = useUserStore.getPersonalInfo()
-    console.log(pageData.personalInfo)
+    refreshPersonalInfo()
   }
 }
-
 
 
 /**
@@ -57,6 +57,13 @@ const onChatClick = () => {
 const onLinkManClick = () => {
   useChatStore.updateMenuActive("linkMan")
 }
+// 刷新个人信息
+const refreshPersonalInfo = () => {
+  // 获取个人信息
+  useUserStore.initPersonalInfo().then(() => {
+    pageData.personalInfo = useUserStore.getPersonalInfo()
+  })
+}
 </script>
 
 
@@ -68,13 +75,15 @@ const onLinkManClick = () => {
     .inner-box {
       width: calc(100vw - 100px);
       display: flex;
-      .linkman{
+
+      .linkman {
         width: 20%;
         min-width: 200px;
       }
-      .message{
+
+      .message {
         min-width: 500px;
-        flex:1;
+        flex: 1;
       }
     }
   }

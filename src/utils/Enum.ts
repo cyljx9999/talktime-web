@@ -1,5 +1,6 @@
 // 接口响应状态枚举
 export enum ResultEnum {
+    HTTP_SUCCESS = 200,
     // 成功
     SUCCESS = 200,
     // 无权限
@@ -40,4 +41,11 @@ export enum ScanLoginResponseStatusEnum {
     LOGIN_SCAN_SUCCESS = 2,
     // 扫码成功
     LOGIN_SUCCESS = 3,
+}
+
+// 上传图片场景状态
+export enum UploadSceneStatusEnum{
+    CHAT = 1,
+    EMOJI = 2,
+    QRCODE = 3,
 }

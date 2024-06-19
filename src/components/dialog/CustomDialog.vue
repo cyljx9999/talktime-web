@@ -1,6 +1,6 @@
 <template>
   <div class="custom-dialog-container">
-    <el-dialog v-model="props.visible" :show-close="false" :width="props.width" :top="props.top" :close-on-click-modal="false">
+    <el-dialog v-model="props.visible" :show-close="false" :width="props.width" :top="props.top" :close-on-click-modal="false" :append-to-body="props.isAppendToBody">
       <template #header>
         <div class="header flex-row-between">
           <h4 class="title">{{ props.title }}</h4>
@@ -67,7 +67,11 @@ const props = defineProps({
   },
   loading: {
     type: Boolean,
-    default: true
+    default: false
+  },
+  isAppendToBody:{
+    type: Boolean,
+    default: false
   }
 })
 const emit = defineEmits(['onClose','onConfirm','download'])

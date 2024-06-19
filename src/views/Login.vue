@@ -202,7 +202,7 @@ const accountLoginRules = reactive({
 // 手机登录校验规则
 const phoneLoginRules = reactive({
   phone: [
-    {required: true, message: '请输入账号', trigger: 'blur'},
+    {required: true, message: '请输入手机号', trigger: 'blur'},
     {
       pattern: /^(0|86|17951)?(13[0-9]|15[012356789]|166|17[3678]|18[0-9]|14[57])[0-9]{8}$/,
       message: '请输入正确的手机号',

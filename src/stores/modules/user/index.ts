@@ -33,10 +33,15 @@ export const userStore = defineStore('userStore', () => {
         localStorage.setItem('encryptStr', encryptStr)
     }
     const initPersonalInfo = () => {
+        localStorage.removeItem('encryptStr')
         // 获取用户信息
-        getPersonalApi().then(res => {
-            localStorage.setItem('encryptStr', res.data)
-        });
+        return new Promise((resolve) => {
+            getPersonalApi().then(res => {
+                localStorage.setItem('encryptStr', res.data)
+                data.encryptStr = res.data
+                resolve();
+            });
+        })
     }
     return {
         getPersonalInfo,
