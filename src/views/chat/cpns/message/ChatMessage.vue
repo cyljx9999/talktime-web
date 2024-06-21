@@ -1,5 +1,5 @@
 <template>
-  <div class="head-container">
+  <div class="link-container">
 aaa
   </div>
 </template>
@@ -10,7 +10,7 @@ aaa
 
 
 <style scoped lang="scss">
-.head-container{
+.link-container{
   height: calc(100vh - 70px);
   background-color: #0e56c2;
 }

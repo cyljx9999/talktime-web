@@ -14,6 +14,8 @@ import 'virtual:svg-icons-register'
 import { ElMessage } from "element-plus";
 import 'animate.css' //引入
 import 'element-plus/theme-chalk/dark/css-vars.css'
+import 'vant/lib/index.css';
+import { IndexBar, IndexAnchor,Cell } from 'vant';
 
 
 const app = createApp(App)
@@ -27,5 +29,8 @@ app.use(router)
 app.use(ElementPlus, {
     locale: zhCn,
 })
+app.use(IndexBar);
+app.use(Cell);
+app.use(IndexAnchor);
 app.use(globalComponent)
 app.mount('#app')

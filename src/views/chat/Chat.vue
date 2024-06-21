@@ -77,8 +77,7 @@ const refreshPersonalInfo = () => {
       display: flex;
 
       .linkman {
-        width: 20%;
-        min-width: 200px;
+        width: 420px;
       }
 
       .message {

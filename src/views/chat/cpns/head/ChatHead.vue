@@ -1,5 +1,5 @@
 <template>
-  <div class="head-container flex-row-between">
+  <div class="link-container flex-row-between">
     <div class="title">Message</div>
     <div class="right-box flex-row-around">
       <div class="badge">
@@ -17,7 +17,7 @@
                     :src="personInfo.userAvatar"/>
         </div>
         <div class="center flex-column-center">
-          <div class="userName">{{ personInfo.userName }}</div>
+          <div class="userName ellipsis">{{ personInfo.userName }}</div>
           <div class="status-box flex-row-around">
             <svg-icon name="circle" color="#4f54f6" width="20px" height="20px"></svg-icon>
             <div class="statusName">
@@ -480,7 +480,7 @@ const confirmPrivacySettingDrawerClick = () => {
 
 
 <style scoped lang="scss">
-.head-container {
+.link-container {
   width: calc(100vw - 100px);
   min-width: 800px;
   height: 70px;
@@ -524,10 +524,6 @@ const confirmPrivacySettingDrawerClick = () => {
         .userName {
           width: 90px;
           text-align: center;
-          // 超出长度省略号
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
           font-size: 14px;
         }
 

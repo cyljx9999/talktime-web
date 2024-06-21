@@ -64,3 +64,49 @@ export function secondFormatText(time){
     }
     return duration;
 }
+
+function f(time: any) {
+    return time < 10 ? "0" + time : time
+}
+
+export function formatTime(time: any) {
+    const date = new Date(time)
+    const year = date.getFullYear()
+    const month = date.getMonth() + 1//月份是从0开始的
+    const day = date.getDate()
+    const hour = date.getHours()
+    const min = date.getMinutes()
+    const weekNumber = date.getDay()
+    const weekDay = ["星期天", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"];
+
+    const nowTime = new Date()
+    const nowYear = nowTime.getFullYear()
+    const nowMonth = nowTime.getMonth() + 1//月份是从0开始的
+    const nowDay = nowTime.getDate()
+
+
+    if (year == nowYear) {
+        if(month == nowMonth){
+            // 判断传入的时间是否为今天
+            if (day === nowDay) {
+                return f(hour) + ":" + f(min)
+            } else if (day - nowDay === -1) {
+                // 判断传入的时间是否为昨天
+                return "昨天  " + f(hour) + ":" + f(min)
+            } else if (day - nowDay >= -2 || day - nowDay <= 7) {
+                // 判断传入的时间是否为前一周内，除去昨天
+                return weekDay[weekNumber]
+            } else {
+                // 传入的时间大于前一周
+                return year + "-" + month + "-" + day
+            }
+        }else {
+            // 传入的时间大于前一周
+            return year + "-" + month + "-" + day
+        }
+    }else {
+        // 传入的时间大于前一周
+        return year + "-" + month + "-" + day
+    }
+
+}

@@ -22,6 +22,13 @@
   align-items: center;
 }
 
+.flex-row-first {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+}
+
 // flex布局竖向居中
 .flex-column-center {
   display: flex;
@@ -52,3 +59,37 @@
   justify-content: space-around;
   align-items: center;
 }
+
+// 超出省略号
+.ellipsis{
+  // 超出长度省略号
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+// 美化滚动条
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  width: 6px;
+  background: rgba(#101F1C, 0.1);
+  -webkit-border-radius: 2em;
+  -moz-border-radius: 2em;
+  border-radius: 2em;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: $system-color;
+  background-clip: padding-box;
+  min-height: 28px;
+  -webkit-border-radius: 2em;
+  -moz-border-radius: 2em;
+  border-radius: 2em;
+  transition: background-color .3s;
+  cursor: pointer;
+}
+
