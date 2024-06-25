@@ -1,58 +1,85 @@
 <template>
   <div class="friend-list-container">
     <el-divider content-position="center">好友列表</el-divider>
-    <van-index-bar :index-list="indexList">
-      <van-index-anchor index="1">标题1</van-index-anchor>
-      <div class="friend-item flex-row-first">
-        <div class="img-box">
-          <el-image class="avatar" src="https://tse1-mm.cn.bing.net/th/id/OIP-C.Cq4khLPWJj0oPbx9P_dRbwAAAA?rs=1&pid=ImgDetMain"></el-image>
-        </div>
-        <div class="name ellipsis">aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</div>
-      </div>
+    <van-index-bar :index-list="pageData.indexBarList">
+      <template v-for="item in pageData.friendList">
+        <van-index-anchor :index="item.type">{{item.type}}</van-index-anchor>
+        <template v-for="friend in item.userList">
+          <div class="friend-item flex-row-start">
+            <div class="img-box">
+              <el-image class="avatar"
+                        :src="friend.userAvatar"></el-image>
+            </div>
+            <div class="name ellipsis">{{friend.userName}}</div>
+          </div>
+        </template>
+      </template>
     </van-index-bar>
   </div>
 </template>
 
 <script setup lang="ts">
+// @ts-nocheck
+import {reactive} from "vue";
+import {getFriendListApi} from "@/api/friendApi.ts";
 
-const indexList =[1, 2, 3, 4, 5,6,7,8,9,10]
+const pageData = reactive({
+  indexBarList: [],
+  friendList: []
+})
+
+const getFriendList = () => {
+  getFriendListApi().then(res => {
+    pageData.friendList = res.data
+    pageData.indexBarList = res.data.map(item => item.type)
+  })
+}
+getFriendList()
+
 </script>
 
 
 <style scoped lang="scss">
-.friend-list-container{
+.friend-list-container {
   overflow-y: scroll;
-  .friend-item{
+
+  .friend-item {
     height: 60px;
-    .img-box{
+
+    .img-box {
       width: 55px;
       margin: 0 10px;
-      .avatar{
+
+      .avatar {
         width: 50px;
         border-radius: 50%;
         height: 50px;
       }
     }
   }
-  .message-item:hover{
+
+  .friend-item:hover {
     background-color: #dad9d9;
   }
 }
 
-:deep(.van-index-anchor--sticky){
+:deep(.van-index-anchor--sticky) {
   color: #e6b131;
 }
-:deep(.van-index-bar__sidebar){
+
+:deep(.van-index-bar__sidebar) {
   width: 30px;
-  left:473px;
+  left: 473px;
   right: 0;
   text-align: center;
 }
-:deep(.van-index-bar__index){
+
+:deep(.van-index-bar__index) {
   font-size: 14px;
   padding: 5px;
 }
-:deep(.van-index-bar__index--active){
+
+:deep(.van-index-bar__index--active) {
   color: $system-color;
 }
 </style>

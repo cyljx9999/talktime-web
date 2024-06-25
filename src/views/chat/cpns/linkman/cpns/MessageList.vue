@@ -1,6 +1,6 @@
 <template>
   <div class="message-list-container">
-    <div class="message-item flex-row-first">
+    <div class="message-item flex-row-start">
       <div class="img-box">
         <el-image class="avatar"
                   src="https://tse1-mm.cn.bing.net/th/id/OIP-C.Cq4khLPWJj0oPbx9P_dRbwAAAA?rs=1&pid=ImgDetMain"></el-image>

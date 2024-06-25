@@ -486,7 +486,7 @@ const confirmPrivacySettingDrawerClick = () => {
   height: 70px;
   background-color: #f5f5f5;
   padding-right: 40px;
-  border-bottom: 1px solid #f5f5f5;
+  border-bottom: 1px solid #cfcfcf;
 
   .title {
     font-size: 25px;

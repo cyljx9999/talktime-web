@@ -9,8 +9,8 @@
       </el-button>
     </div>
 
-    <message-list></message-list>
-    <friend-list v-if="false"></friend-list>
+    <message-list  v-if="false"></message-list>
+    <friend-list></friend-list>
   </div>
 </template>
 
@@ -29,12 +29,16 @@ const pageData = reactive({
 
 
 <style scoped lang="scss">
-.link-container{
+.link-container {
+  background-color: #f8f8f8;
   width: 420px;
   height: calc(100vh - 70px);
-  .search-box{
-      margin: 10px 0;
+
+  .search-box {
+    margin: 10px 0;
   }
+
+  border-right: 1px solid #cfcfcf;
 }
 :deep(.el-input){
   width: 260px;
